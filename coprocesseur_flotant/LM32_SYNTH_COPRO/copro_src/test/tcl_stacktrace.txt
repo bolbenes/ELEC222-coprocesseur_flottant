@@ -1,0 +1,24 @@
+ven. nov. 04 16:42:18 CET 2011
+Trace back: can't read "mtiBalloonWidgets(wndw)": no such element in array
+    while executing
+"if {$w ne $mtiBalloonWidgets(wndw)} {
+		Leave $mtiBalloonWidgets(wndw)
+	}"
+    (procedure "mtiBalloon::Motion" line 9)
+    invoked from within
+"mtiBalloon::Motion .footer.env"
+    (command bound to event)
+  <2: ::tkerror {can't read "mtiBalloonWidgets(wndw)": no such element in array}
+  <1: ::bgerror {can't read "mtiBalloonWidgets(wndw)": no such element in array}
+ven. nov. 04 16:42:48 CET 2011
+Trace back: can't read "mtiBalloonWidgets(wndw)": no such element in array
+    while executing
+"if {$w ne $mtiBalloonWidgets(wndw)} {
+		Leave $mtiBalloonWidgets(wndw)
+	}"
+    (procedure "mtiBalloon::Motion" line 9)
+    invoked from within
+"mtiBalloon::Motion .footer.env"
+    (command bound to event)
+  <2: ::tkerror {can't read "mtiBalloonWidgets(wndw)": no such element in array}
+  <1: ::bgerror {can't read "mtiBalloonWidgets(wndw)": no such element in array}

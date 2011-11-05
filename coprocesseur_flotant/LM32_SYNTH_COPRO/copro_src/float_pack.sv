@@ -1,0 +1,120 @@
+package float_pack; 
+// Ajouter ici les définition des fonctions
+   // utilisée par votre coprocesseur
+   parameter Nm =`TB_MANT_SIZE;
+   parameter Ne =`TB_EXP_SIZE;
+   
+   typedef struct packed 
+		  {
+		     logic signe;
+		     logic [Ne-1:0] exponent;
+		     logic [Nm-1:0] mantisse;
+		  } float ;
+   
+   typedef struct packed 
+		  {
+		     logic signe;
+		     logic [8-1:0] exponent;
+		     logic [23-1:0]  mantisse;
+		  } float_ieee;
+
+   function float_ieee real2float_ieee ( input shortreal real_in);
+	 return ($shortrealtobits(real_in));
+   endfunction // real2float_ieee
+   
+   function shortreal float_ieee2real ( input float_ieee float_in);
+      return ($bitstoshortreal(float_in));
+   endfunction // float_ieee2real
+
+   /*
+   function float real2float ( input shortreal real_in);
+      float_ieee  ieee;
+      integer 	   exponent;
+     
+      begin
+	 ieee = $shortrealtobits(real_in);
+	 // traitement du signe
+	 result.signe = ieee.signe;
+	 // traitement de l'exposant
+	 exponent = ieee.exponent;
+	 exponent = exponent - 127;
+	 
+	 if(exponent <= (2**(Ne-1)-1) && exponent >= (-2**(Ne-1)+2))
+	   begin
+	      result.exponent = exponent+2**(Ne-1)-1;
+	      result.mantisse ='0;
+	      if (Nm <= 23)
+		result.mantisse = ieee.mantisse[22:22-Nm+1];
+	      else
+		begin
+		   result.mantisse[Nm-1:Nm-23] = ieee.mantisse;
+		end  
+	   end // if (exponent <= (2**(Ne-1)-1) and exponent >= (-2**(Ne-1)+2))
+	 // cas de zéro
+	 else if (exponent == -127)
+	   begin
+	      result.exponent = '0; //on tronque
+	      result.mantisse = '0;
+	   end
+	 // cas ou exponent n'est pas dans l'intervalle -> sature
+	 else
+	   begin
+	      result.exponent = 2**Ne-2; // on sature
+	      result.mantisse = '1;
+	   end // else: !if(exponent == -127)
+	 return result;
+      end
+   endfunction // real2float
+*/
+    
+   function float real2float (input shortreal real_in);
+	return (float_ieee2float($shortrealtobits(real_in)));
+   endfunction // real2float
+
+   function shortreal float2real (input float float_in);
+     return $bitstoshortreal(float2float_ieee(float_in));
+   endfunction // float2real
+   
+
+   // condition: float: moins de bits que float_ieee
+   function float_ieee float2float_ieee(input float float_in);
+      
+      float_ieee result;
+      
+     begin
+	result.exponent = float_in.exponent+127-(2**(Ne-1)-1);
+	result.mantisse = '0;
+	result.mantisse[22:22-(Nm-1)] = float_in.mantisse;
+	result.signe = float_in.signe;
+	return result;
+     end
+   endfunction // float2float_ieee
+
+   function float float_ieee2float(input float_ieee float_in);
+      
+      integer exposant;
+      float result;
+      
+      begin
+	 exposant = float_in.exponent - 127;
+	 if(exposant <= 2**(Ne-1)-1 && exposant >= -2**(Ne-1)+2)
+	   begin
+	      result.exponent = exposant + 2**(Ne-1)-1;
+	      result.mantisse = float_in.mantisse[22:22-(Nm-1)];
+	   end
+	 else if(exposant > 2**(Ne-1)-1)
+	   begin
+	      result.exponent = 2**Ne-2;
+	      result.mantisse = '1;
+	   end
+	 else if(exposant < -2**(Ne-1)+2)
+	   begin
+	      result.exponent = '0;
+	      result.mantisse = '0;
+	   end
+	 result.signe = float_in.signe;
+	 return result;
+      end
+   endfunction // float_ieee2float   
+endpackage : float_pack
+   

@@ -1,0 +1,33 @@
+module float_pack_tb ;
+
+   import float_pack::*;
+
+   shortreal A;
+   //shortreal A_2;
+   shortreal result_real;
+   float_ieee B;
+   //float_ieee B_2;
+   //float_ieee result_ieee;
+   
+
+   
+   initial
+     begin
+	# 10 ;
+	
+	A = 1.5;
+	B = real2float_ieee(A);
+	result_real = float_ieee2real(B);
+
+
+
+	//$display ("resultat ieee real ieee %f  %f \n",B,result_ieee);	
+	assert (A == result_real)
+ 	  	$display ("OK resultat real-> ieee-> real %f  %f \n",A,result_real);
+	   else
+	 	$display ("ERROR resultat real-> ieee-> real %f  %f \n",A,result_real);
+	 
+	     
+     end
+   
+endmodule

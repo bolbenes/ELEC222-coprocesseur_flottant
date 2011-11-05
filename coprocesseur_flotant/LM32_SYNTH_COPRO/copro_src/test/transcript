@@ -1,0 +1,4 @@
+# vsim -c ../float_pack_tb.sv 
+# ** Error: (vsim-19) Failed to access library '../float_pack_tb' at "../float_pack_tb".
+# No such file or directory. (errno = ENOENT)
+# Error loading design
