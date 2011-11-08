@@ -1,8 +1,8 @@
 package float_pack; 
 // Ajouter ici les définition des fonctions
    // utilisée par votre coprocesseur
-   parameter Nm =`TB_MANT_SIZE;
-   parameter Ne =`TB_EXP_SIZE;
+   parameter Nm =23;//=`TB_MANT_SIZE;
+   parameter Ne = 8;//`TB_EXP_SIZE;
    
    typedef struct packed 
 		  {
@@ -26,47 +26,6 @@ package float_pack;
       return ($bitstoshortreal(float_in));
    endfunction // float_ieee2real
 
-   /*
-   function float real2float ( input shortreal real_in);
-      float_ieee  ieee;
-      integer 	   exponent;
-     
-      begin
-	 ieee = $shortrealtobits(real_in);
-	 // traitement du signe
-	 result.signe = ieee.signe;
-	 // traitement de l'exposant
-	 exponent = ieee.exponent;
-	 exponent = exponent - 127;
-	 
-	 if(exponent <= (2**(Ne-1)-1) && exponent >= (-2**(Ne-1)+2))
-	   begin
-	      result.exponent = exponent+2**(Ne-1)-1;
-	      result.mantisse ='0;
-	      if (Nm <= 23)
-		result.mantisse = ieee.mantisse[22:22-Nm+1];
-	      else
-		begin
-		   result.mantisse[Nm-1:Nm-23] = ieee.mantisse;
-		end  
-	   end // if (exponent <= (2**(Ne-1)-1) and exponent >= (-2**(Ne-1)+2))
-	 // cas de zéro
-	 else if (exponent == -127)
-	   begin
-	      result.exponent = '0; //on tronque
-	      result.mantisse = '0;
-	   end
-	 // cas ou exponent n'est pas dans l'intervalle -> sature
-	 else
-	   begin
-	      result.exponent = 2**Ne-2; // on sature
-	      result.mantisse = '1;
-	   end // else: !if(exponent == -127)
-	 return result;
-      end
-   endfunction // real2float
-*/
-    
    function float real2float (input shortreal real_in);
 	return (float_ieee2float($shortrealtobits(real_in)));
    endfunction // real2float
@@ -115,6 +74,43 @@ package float_pack;
 	 result.signe = float_in.signe;
 	 return result;
       end
-   endfunction // float_ieee2float   
+   endfunction // float_ieee2float
+   
+   function float float_mul(input float A, input float B);
+      
+      float result,max_exposant,min_exposant;
+      logic [Nm:0] mantisse_max, mantisse_min;
+      logic [2*Nm:0] mantisse_result;
+            
+      begin
+	 // on calcule le signe
+	 result.signe = A.signe + B.signe;
+	 // on calcule l'exposant
+	 result.exponent = A.exponent + B.exponent + (2**(Ne-1)-1);
+	 //calcul de la mantisse
+	 if (A.exponent < B.exponent)
+	   begin
+	      mantisse_max = {1,B.mantisse};
+	      mantisse_min ={1,A.mantisse};
+	      mantisse_result = mantisse_max * (mantisse_min >> (A.exponent - B.exponent));// on décale la mantisse de l'écart entre les exposants
+	   end
+	 else
+	   begin
+	      mantisse_max = {1,A.mantisse};
+	      mantisse_min ={1,B.mantisse};
+	      mantisse_result = mantisse_max * (mantisse_min >> (A.exponent - B.exponent));// on décale la mantisse de l'écart entre les exposants
+	   end // else: !if(A.exponent < B.exponent)
+	 if (mantisse_result*2**(-2*Nm)>=2)
+	   begin
+	      result.exponent = result.exponent +1;
+	      result.mantisse = (mantisse_result[2*Nm-1:Nm-1]>>1);
+	   end
+	 else
+	   result.mantisse = mantisse_result[2*Nm-1:Nm-1];
+	 
+	 return result; 
+      end
+   endfunction
+    
 endpackage : float_pack
    
