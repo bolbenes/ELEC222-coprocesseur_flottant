@@ -1,6 +1,9 @@
 module float_pack_tb ;
 
    import float_pack::*;
+   `include "../find_first_bit_one.sv"
+   
+   
 
    // variable de conversion
    shortreal A;
@@ -13,6 +16,13 @@ module float_pack_tb ;
    // variables de test pour la multiplication
    float A_mf, B_mf,result_mf,res_m ;
    shortreal error;
+
+   // variables de test pour le premier un
+   logic[23:0] mantisse_to_check;
+   logic[4:0] result_first_one;
+   int 	      i, found, position;
+   
+   FIND_FIRST_BIT_ONE I_FFBO (.word(mantisse_to_check), .first_one(result_first_one));
    
    initial
      begin
@@ -55,6 +65,35 @@ module float_pack_tb ;
 	       $display ("OK resultat correct\n%d\n%d\n%d\n%d\n%f\n",A_mf,B_mf,result_mf,res_m,error);
 	     else
 	       $display ("ERREUR resultat incorrect\n%d\n%d\n%d\n%d\n%f\n",A_mf,B_mf,result_mf,res_m,error);	
+	  end // repeat (100)
+
+
+
+		//test find first one
+	
+	#5;
+	repeat(100)
+	  begin
+	     #1;
+	     mantisse_to_check = $random();
+		 found = 0;
+		 i=23;
+		 position=0;
+		 while(found==0)
+		 begin
+			if(mantisse_to_check[i] == 1)
+			begin
+				found =1;
+				position=i;
+			end
+			i--;
+		 end
+	  	 
+	     #1;
+	     if(result_first_one == position)
+	       $display ("OK resultat correct");
+	     else
+	       $display ("ERREUR resultat incorrect\nnumber: %b\n proposed first one: %b\nreal first one: %b\n",mantisse_to_check,result_first_one,position);	
 	  end // repeat (100)
      end
    
