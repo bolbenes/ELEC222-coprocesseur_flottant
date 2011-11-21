@@ -123,7 +123,6 @@ package float_pack;
    logic[24:0] result_mantisse_unnorm;
    logic[23:0] mantisse_to_check;
    logic[4:0] result_first_one;
-   FIND_FIRST_BIT_ONE I_FFBO (.word(mantisse_to_check), .first_one(result_first_one));
    float Aa,Bb;
    logic subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
    begin
@@ -160,8 +159,8 @@ package float_pack;
 			result_mantisse_unnorm = temp2-temp1;
 	end
 	findfirst1 = result_mantisse_unnorm;
-	
-	//result_mantisse[23- = 
+	result_mantisse = '0;
+	result_mantisse = {
    end
     
 endpackage : float_pack
