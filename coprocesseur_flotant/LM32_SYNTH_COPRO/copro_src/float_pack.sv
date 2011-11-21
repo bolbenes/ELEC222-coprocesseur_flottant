@@ -1,8 +1,8 @@
 package float_pack; 
 // Ajouter ici les définition des fonctions
    // utilisée par votre coprocesseur
-   parameter Nm =23;//=`TB_MANT_SIZE;
-   parameter Ne = 8;//`TB_EXP_SIZE;
+   parameter Nm =`TB_MANT_SIZE;
+   parameter Ne = `TB_EXP_SIZE;
    `include "../find_first_bit_one.sv"
    typedef struct packed 
 		  {
