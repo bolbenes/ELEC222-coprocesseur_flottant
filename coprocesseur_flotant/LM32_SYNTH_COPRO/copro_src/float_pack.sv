@@ -3,6 +3,8 @@ package float_pack;
    // utilisée par votre coprocesseur
    parameter Nm =23;//=`TB_MANT_SIZE;
    parameter Ne = 8;//`TB_EXP_SIZE;
+   `include "../find_first_bit_one.sv"
+
    
    typedef struct packed 
 		  {
@@ -160,7 +162,7 @@ package float_pack;
 	end
 	findfirst1 = result_mantisse_unnorm;
 	result_mantisse = '0;
-	result_mantisse = {
+//	result_mantisse = {
    end
     
 endpackage : float_pack
