@@ -3,15 +3,13 @@ package float_pack;
    // utilisée par votre coprocesseur
    parameter Nm =23;//=`TB_MANT_SIZE;
    parameter Ne = 8;//`TB_EXP_SIZE;
-   `include "../find_first_bit_one.sv"
-
    
    typedef struct packed 
 		  {
 		     logic signe;
 		     logic [Ne-1:0] exponent;
 		     logic [Nm-1:0] mantisse;
-		  } float ;
+		  } float;
    
    typedef struct packed 
 		  {
@@ -123,7 +121,10 @@ package float_pack;
    logic[24:0] temp1, temp2; //(pour assigner le signe avant l'opération)
    logic[24:0] result_mantisse_unnorm;
    logic[23:0] mantisse_to_check;
-   logic[4:0] result_first_one;
+   logic [4:0] result_first_one; 
+   logic [63:0] temp_shift;
+   logic [23:0] result_mantisse;
+    
    float Aa,Bb;
    logic subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
    begin
@@ -141,11 +142,16 @@ package float_pack;
 	exp_difference = Aa.exponent-Bb.exponent;
 	if(exp_difference > Nm-1)
 		return Aa;
-	shifted_mantisse = {1'b0,(Aa.exponent-Bb.exponent){1'b0},1'b1, Bb.mantisse[Nm-1:Nm-1-(Aa.exponent-Bb.exponent)])};
+        temp_shift = '0;
+        temp_shift[23] = 1;
+        temp_shift[22:0]= Bb.mantisse;
+            
+        shifted_mantisse = temp_shift[23+exp_difference-:24];
+      
 	if(Aa.signe == 0)
 		temp1 = {2'b00, Aa.mantisse};
 	else
-		temp1 = {2b'11, 0-Aa.mantisse};
+		temp1 = {2'b11, 0-Aa.mantisse};
 	if(Bb.signe == 0)
 		temp2 = shifted_mantisse;
 	else
@@ -163,6 +169,6 @@ package float_pack;
 	result_mantisse = '0;
 //	result_mantisse = {
    end
-    
+endfunction
 endpackage : float_pack
    

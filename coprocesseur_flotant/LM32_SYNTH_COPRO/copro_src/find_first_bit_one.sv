@@ -12,7 +12,8 @@ function logic basic_2_tuple(input logic[1:0] tupel2);
 endfunction
 
 function logic[4:0] find_first_bit_one(input logic[23:0] word);
-	logic[4:0] first_one
+   logic[4:0] first_one;
+   
 // Calculation de la position du premier un
 begin
 	if(word[23:16] == '0)
@@ -118,3 +119,4 @@ begin
 		
 	end
 end
+endfunction
