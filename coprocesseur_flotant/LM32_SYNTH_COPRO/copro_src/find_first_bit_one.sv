@@ -1,9 +1,3 @@
-module FIND_FIRST_BIT_ONE /* # ( parameter NumberOfBits = 32, width = (NumberOfBits <= 2) ? 1 : (NumberOfBits <= 4) ? 2 : (NumberOfBits <= 8) ? 3 : (NumberOfBits <= 16) ? 4 : (NumberOfBits <= 32) ? 5 : (NumberOfBits <= 64) ? 6 : 7; )*/
-	(
-	input logic[23:0] word,
-	output logic[4:0] first_one
-	);
-	
 // ici on implémente la fonction de base pour trouver dans un bloc de 2 bits les cas '1X' et '01'.
 // Le cas '00' n'est pas important, parce qu'on va choisir avec un arbre et une comparaison les blocs de base qui sont important.
 function logic basic_2_tuple(input logic[1:0] tupel2);
@@ -17,8 +11,9 @@ function logic basic_2_tuple(input logic[1:0] tupel2);
      end
 endfunction
 
+function logic[4:0] find_first_bit_one(input logic[23:0] word);
+	logic[4:0] first_one
 // Calculation de la position du premier un
-always_comb
 begin
 	if(word[23:16] == '0)
 	begin
@@ -123,4 +118,3 @@ begin
 		
 	end
 end
-endmodule

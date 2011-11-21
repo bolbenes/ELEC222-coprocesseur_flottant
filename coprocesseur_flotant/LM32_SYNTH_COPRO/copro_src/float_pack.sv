@@ -116,8 +116,7 @@ package float_pack;
    
    logic[23:0] findfirst1;
    logic [4:0] resultfirst1;
-   find_first_bit_one i_find_first_bit_one ( .word(findfirst1), .first_one(resultfirst1));
-   
+  
    function float float_add_sub(input float A, input float B, logic add_sub); // add: add_sub=0, sub: add_sub=1
    int exp_difference;
    logic[24:0] shifted_mantisse;
@@ -160,7 +159,7 @@ package float_pack;
 		else
 			result_mantisse_unnorm = temp2-temp1;
 	end
-	findfirst1 = result_mantisse_unnorm;
+	resultfirst1 = find_first_bit_one(result_mantisse_unnorm);
 	result_mantisse = '0;
 //	result_mantisse = {
    end
