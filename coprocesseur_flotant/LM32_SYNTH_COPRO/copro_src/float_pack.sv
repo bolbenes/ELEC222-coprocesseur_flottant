@@ -114,7 +114,10 @@ package float_pack;
    
    logic[23:0] findfirst1;
    logic [4:0] resultfirst1;
-  
+	
+	function float float_add(input float A, input float B);
+	return float_add_sub(A,B,0);
+   
    function float float_add_sub(input float A, input float B, logic add_sub); // add: add_sub=0, sub: add_sub=1
    int exp_difference;
    logic[24:0] shifted_mantisse;
