@@ -112,7 +112,11 @@ package float_pack;
       end
    endfunction
    
-   function float float_add_sub(input float A, input float B, logic add-sub); // add: add-sub=0, sub: add-sub=1
+   logic[23:0] findfirst1;
+   logic [4:0] resultfirst1;
+   find_first_bit_one i_find_first_bit_one ( .word(findfirst1), .first_one(resultfirst1));
+   
+   function float float_add_sub(input float A, input float B, logic add_sub); // add: add_sub=0, sub: add_sub=1
    int exp_difference;
    logic[24:0] shifted_mantisse;
    logic[24:0] temp1, temp2; //(pour assigner le signe avant l'opération)
@@ -146,7 +150,7 @@ package float_pack;
 		temp2 = shifted_mantisse;
 	else
 		temp2 = 0-shifted_mantisse;
-	if(add-sub == 0) // add
+	if(add_sub == 0) // add
 		result_mantisse_unnorm = temp1+temp2;
 	else
 	begin
@@ -155,6 +159,9 @@ package float_pack;
 		else
 			result_mantisse_unnorm = temp2-temp1;
 	end
+	findfirst1 = result_mantisse_unnorm;
+	
+	//result_mantisse[23- = 
    end
     
 endpackage : float_pack
