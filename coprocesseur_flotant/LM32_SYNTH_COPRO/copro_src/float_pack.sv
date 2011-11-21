@@ -123,7 +123,10 @@ package float_pack;
    logic[23:0] mantisse_to_check;
    logic [4:0] result_first_one; 
    logic [63:0] temp_shift;
+   logic [47:0] temp_mantisse;
    logic [23:0] result_mantisse;
+   logic 	result_signe;
+      
     
    float Aa,Bb;
    logic subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
@@ -160,14 +163,43 @@ package float_pack;
 		result_mantisse_unnorm = temp1+temp2;
 	else
 	begin
+	     if(temp1>temp2)
+	       begin  
 		if(subtrahend == 0)
-			result_mantisse_unnorm = temp1-temp2;
+		  begin
+		     result_mantisse_unnorm = temp1-temp2;
+		     result_signe = 0;
+		  end
 		else
-			result_mantisse_unnorm = temp2-temp1;
-	end
+		  begin
+		     result_mantisse_unnorm = temp2-temp1;
+		     result_signe = 1;
+		  end
+	       end
+	     else
+	       begin
+		  if(subtrahend == 0)
+		    begin
+		       result_mantisse_unnorm = temp1-temp2;
+		       result_signe = 1;
+		    end
+		  else
+		    begin
+		       result_mantisse_unnorm = temp2-temp1;
+		       result_signe = 0;
+		    end
+	       end // else: !if(temp1>temp2)
+	end // else: !if(add_sub == 0)
 	resultfirst1 = find_first_bit_one(result_mantisse_unnorm);
-	result_mantisse = '0;
-//	result_mantisse = {
+        temp_mantisse = '0;
+        temp_mantisse[47:24]=result_mantisse;
+        result_mantisse = '0;
+        
+        result_mantisse = temp_mantisse[(47-(24-resultfirst1))-:24];
+        Aa.exponent = Aa.exponent - (24-resultfirst1);
+        Aa.signe = result_signe;
+        Aa.mantisse = result_mantisse;
+        return Aa;
    end
 endfunction
 endpackage : float_pack
