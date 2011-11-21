@@ -111,6 +111,51 @@ package float_pack;
 	 return result; 
       end
    endfunction
+   
+   function float float_add_sub(input float A, input float B, logic add-sub); // add: add-sub=0, sub: add-sub=1
+   int exp_difference;
+   logic[24:0] shifted_mantisse;
+   logic[24:0] temp1, temp2; //(pour assigner le signe avant l'opération)
+   logic[24:0] result_mantisse_unnorm;
+   logic[23:0] mantisse_to_check;
+   logic[4:0] result_first_one;
+   FIND_FIRST_BIT_ONE I_FFBO (.word(mantisse_to_check), .first_one(result_first_one));
+   float Aa,Bb;
+   logic subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
+   begin
+	if(A.exponent <= B.exponent)
+	begin
+		Aa = B;
+		Bb = A;
+		subtrahend = 1;
+	end
+	else
+	begin
+		Aa = A;
+		Bb = B;
+	end
+	exp_difference = Aa.exponent-Bb.exponent;
+	if(exp_difference > Nm-1)
+		return Aa;
+	shifted_mantisse = {1'b0,(Aa.exponent-Bb.exponent){1'b0},1'b1, Bb.mantisse[Nm-1:Nm-1-(Aa.exponent-Bb.exponent)])};
+	if(Aa.signe == 0)
+		temp1 = {2'b00, Aa.mantisse};
+	else
+		temp1 = {2b'11, 0-Aa.mantisse};
+	if(Bb.signe == 0)
+		temp2 = shifted_mantisse;
+	else
+		temp2 = 0-shifted_mantisse;
+	if(add-sub == 0) // add
+		result_mantisse_unnorm = temp1+temp2;
+	else
+	begin
+		if(subtrahend == 0)
+			result_mantisse_unnorm = temp1-temp2;
+		else
+			result_mantisse_unnorm = temp2-temp1;
+	end
+   end
     
 endpackage : float_pack
    
