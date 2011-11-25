@@ -115,9 +115,11 @@ package float_pack;
    logic[23:0] findfirst1;
    logic [4:0] resultfirst1;
 	
-	function float float_add(input float A, input float B);
-	return float_add_sub(A,B,0);
-	endfunction
+   function float float_add(input float A, input float B);
+      return 0;
+//return float_add_sub(A,B,0);
+   endfunction
+   
    function float float_add_sub(input float A, input float B, logic add_sub); // add: add_sub=0, sub: add_sub=1
    int exp_difference;
    logic[24:0] shifted_mantisse;
@@ -157,7 +159,7 @@ package float_pack;
 	if(Aa.signe == 0)
 		temp1 = {2'b00, Aa.mantisse};
 	else
-		temp1 = {2'b11, 0-Aa.mantisse};
+		temp1 = {2'b1, 0-Aa.mantisse};
 	if(Bb.signe == 0)
 		temp2 = shifted_mantisse;
 	else
@@ -201,7 +203,7 @@ package float_pack;
         result_mantisse = temp_mantisse[(47-(24-resultfirst1))-:24];
         Aa.exponent = Aa.exponent - (24-resultfirst1);
         Aa.signe = result_signe;
-        Aa.mantisse = result_mantisse[22:0];
+        Aa.mantisse = result_mantisse[10:0];
         return Aa;
    end
 endfunction
