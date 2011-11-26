@@ -105,9 +105,13 @@ $fdisplay(of,"===Test addition===");
 		if (((rD > 0) && (rD <  min_pos_val)) || ((rD < 0) && (rD > min_neg_val)))
 		begin
 		  zero_sat_case++ ;
-		  if (C != pos_zero_val && C!= neg_zero_val) zero_sat_err ++ ;
-		  //$fdisplay(of,"Troncature à zero  positif mal traité") ; 
-		  //$fdisplay(of,"%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
+		  if (C != pos_zero_val && C!= neg_zero_val)
+		    begin
+		       zero_sat_err ++ ;
+		       
+		       $fdisplay(of,"Troncature à zero  positif mal traité") ; 
+		       $fdisplay(of,"%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
+		    end
 		end
 		else // Le signe mauvais
 		if (((rD >0) && (rC<0)) ||((rD<0) && (rC>0)))
@@ -117,7 +121,9 @@ $fdisplay(of,"===Test addition===");
 		else // L'exposant mauvais
 		if ((C.`EXP != D.`EXP)) 
 		begin
-		  exp_out_err++ ;
+		   exp_out_err++ ;
+		   $display("Exp erreur!");
+		   $display("Correct:\nsign = %b\nmantisse = %b\nexponent = %b\n",D.`SIGN,D.`MANT,D.`EXP);
 		end 
 		else // Le cas normal : calcul de l'erreur max et de l'erreur moyenne
 		begin

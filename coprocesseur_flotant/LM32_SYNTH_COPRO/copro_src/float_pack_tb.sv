@@ -73,7 +73,7 @@ module float_pack_tb ;
 	error = float2real((res_m-result_mf)/(res_m+result_mf));
 	
 	if(error<0.05 && error>-0.05)
-	  $display ("OK resultat correct\nA: %b\nB: %b\n A+B: %b\nA+B correct: %b\n Error: %f\n",A_mf,B_mf,result_mf,res_m,error);
+	  $display ("OK resultat correct\nA:\t\t %b\nB:\t\t %b\nA+B:\t\t %b\nA+B correct: \t %b\n Error: %f\n",A_mf,B_mf,result_mf,res_m,error);
 	else
 	  $display ("ERREUR resultat incorrect\n%d\n%d\n%d\n%d\n%f\n",A_mf,B_mf,result_mf,res_m,error);
 

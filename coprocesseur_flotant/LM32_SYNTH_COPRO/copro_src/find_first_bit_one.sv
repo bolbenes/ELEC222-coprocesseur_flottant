@@ -9,8 +9,10 @@ function logic basic_2_tuple(input logic[1:0] tupel2);
      begin
 	return 0;
      end
-endfunction
+endfunction // basic_2_tuple
 
+// la fonction retourne la position du premier un, en partant avec la position 0
+// p.e. 0.....010 -> la fonctin retourne 1
 function logic[4:0] find_first_bit_one(input logic[23:0] word);
    logic[4:0] first_one;
    
@@ -117,6 +119,7 @@ begin
 			end
 		end
 		
-	end
+	end // else: !if(word[23:16] == '0)
+   return first_one;
 end
 endfunction

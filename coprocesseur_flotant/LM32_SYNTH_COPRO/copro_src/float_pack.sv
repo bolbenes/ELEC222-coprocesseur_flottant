@@ -48,7 +48,7 @@ package float_pack;
 	return result;
      end
    endfunction // float2float_ieee
-
+   
    function float float_ieee2float(input float_ieee float_in);
       
       integer exposant;
@@ -116,96 +116,142 @@ package float_pack;
    logic [4:0] resultfirst1;
 	
    function float float_add(input float A, input float B);
-      return 0;
-//return float_add_sub(A,B,0);
+      return float_add_sub(A,B,0);
    endfunction
    
    function float float_add_sub(input float A, input float B, logic add_sub); // add: add_sub=0, sub: add_sub=1
-   int exp_difference;
-   logic[24:0] shifted_mantisse;
-   logic[24:0] temp1, temp2; //(pour assigner le signe avant l'opération)
-   logic[24:0] result_mantisse_unnorm;
-   logic[23:0] mantisse_to_check;
-   logic [4:0] result_first_one; 
-   logic [63:0] temp_shift;
-   logic [47:0] temp_mantisse;
-   logic [23:0] result_mantisse;
-   logic 	result_signe;
+      logic [7:0] exp_difference;
+      logic [24:-2] shifted_mantisse;
+      logic [24:-2] temp1, temp2; // les mantisses qu'on additionne
+      logic [25:-2] result_mantisse_unnorm;
+      logic [23:0] mantisse_to_check;
+      logic [4:0] result_first_one; 
+      logic [47:-2] temp_shift;
+      logic [47:0] temp_mantisse;
+      logic [9:0]  result_exponent;
+      logic [22:0] result_mantisse;
+      logic 	   result_signe;
+      float Aa,Bb;
       
+      logic 	   subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
+      begin
+	 //$display("A.sign = %b\nA.mantisse = %b\nA.exponent = %b\n",A.signe,A.mantisse,A.exponent);
+	 //$display("B.sign = %b\nB.mantisse = %b\nB.exponent = %b\n",B.signe,B.mantisse,B.exponent);
+	 
+	 if({A.exponent,A.mantisse} <= {B.exponent,B.mantisse})
+	   begin
+	      Aa = B;
+	      Bb = A;
+	   subtrahend = 1;
+	   end
+	 else
+	   begin
+	      Aa = A;
+	      Bb = B;
+	   end // else: !if(A.exponent <= B.exponent)
+
+	 if({Bb.mantisse,Bb.exponent} == '0)
+	   return Aa;
+	 
+	 
+	 //$display("\nNouveau calcul\nAa.signe %b\nAa.mantisse %b\nAa.exponent %b\nBb.signe %b\nBb.mantisse %b\nBb.exponent %b",Aa.signe,Aa.mantisse,Aa.exponent,Bb.signe,Bb.mantisse,Bb.exponent);
+	 
+	 exp_difference = Aa.exponent-Bb.exponent;
+	 if(exp_difference > Nm-1)
+	   return Aa;
+         temp_shift = '0;
+         temp_shift[23] = 1;
+         temp_shift[22:0]= Bb.mantisse;
+
+	 //$display("\nexp_difference: %b",exp_difference);
+	 shifted_mantisse = '0;
+         shifted_mantisse[23:-2] = temp_shift[23+exp_difference-:26];
+	 //$display("Aa.mantisse:\t\t\t %b",Aa.mantisse);
+	 //$display("shifted mantisse de Bb:\t %b",shifted_mantisse);
+	 temp1 = {2'b01, Aa.mantisse,2'b0};
+	 //$display("mantisse de Aa:\t\t %b\n",temp1);
+	 temp2 = shifted_mantisse;
+	 
+	 
+	 if(add_sub == 0) // add
+	   begin
+	      result_signe = Aa.signe;
+	      if(Aa.signe == Bb.signe)
+		begin
+		   result_mantisse_unnorm = temp1+temp2;
+		end
+	      else
+		begin
+		   result_mantisse_unnorm = temp1-temp2;
+		end
+	   end // if (add_sub == 0)
+	 else // sub
+	   begin
+	      if(Aa.signe == 0)
+		begin
+		   result_signe = subtrahend;		   
+		end
+	      else
+		begin
+		   result_signe = ~subtrahend;
+		end
+	      if(Aa.signe == Bb.signe)
+		begin
+		   result_mantisse_unnorm = temp1-temp2;
+		end
+	      else
+		begin
+		   result_mantisse_unnorm = temp1+temp2;
+		end	      
+	   end // else: !if(add_sub == 0)
+
+	 //$display("result_mantisse_unnorm: \t%b",result_mantisse_unnorm);
+	 //$display("result_signe: %b",result_signe);
+	 
     
-   float Aa,Bb;
-   logic subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
-   begin
-	if(A.exponent <= B.exponent)
-	begin
-		Aa = B;
-		Bb = A;
-		subtrahend = 1;
-	end
-	else
-	begin
-		Aa = A;
-		Bb = B;
-	end
-	exp_difference = Aa.exponent-Bb.exponent;
-	if(exp_difference > Nm-1)
-		return Aa;
-        temp_shift = '0;
-        temp_shift[23] = 1;
-        temp_shift[22:0]= Bb.mantisse;
-            
-        shifted_mantisse = temp_shift[23+exp_difference-:24];
-      
-	if(Aa.signe == 0)
-		temp1 = {2'b00, Aa.mantisse};
-	else
-		temp1 = {2'b1, 0-Aa.mantisse};
-	if(Bb.signe == 0)
-		temp2 = shifted_mantisse;
-	else
-		temp2 = 0-shifted_mantisse;
-	if(add_sub == 0) // add
-		result_mantisse_unnorm = temp1+temp2;
-	else
-	begin
-	     if(temp1>temp2)
-	       begin  
-		if(subtrahend == 0)
-		  begin
-		     result_mantisse_unnorm = temp1-temp2;
-		     result_signe = 0;
-		  end
-		else
-		  begin
-		     result_mantisse_unnorm = temp2-temp1;
-		     result_signe = 1;
-		  end
-	       end
-	     else
-	       begin
-		  if(subtrahend == 0)
-		    begin
-		       result_mantisse_unnorm = temp1-temp2;
-		       result_signe = 1;
-		    end
-		  else
-		    begin
-		       result_mantisse_unnorm = temp2-temp1;
-		       result_signe = 0;
-		    end
-	       end // else: !if(temp1>temp2)
-	end // else: !if(add_sub == 0)
-	resultfirst1 = find_first_bit_one(result_mantisse_unnorm);
-        temp_mantisse = '0;
-        temp_mantisse[47:24]=result_mantisse;
-        result_mantisse = '0;
-        
-        result_mantisse = temp_mantisse[(47-(24-resultfirst1))-:24];
-        Aa.exponent = Aa.exponent - (24-resultfirst1);
-        Aa.signe = result_signe;
-        Aa.mantisse = result_mantisse[10:0];
-        return Aa;
-   end
-endfunction
+	 resultfirst1 = find_first_bit_one(result_mantisse_unnorm[25:2]);
+         //$display("first 1: %d",resultfirst1);
+
+	 if(resultfirst1 == 5'b0 && result_mantisse_unnorm[2:0] == 3'b0)
+	   begin
+	      result_mantisse = '0;
+	      Aa.exponent = '0;
+	   end
+	 else
+	   begin
+	      result_mantisse_unnorm = result_mantisse_unnorm << (25-resultfirst1-1);
+	      result_mantisse = result_mantisse_unnorm[25-:23];
+	      result_exponent = Aa.exponent - (21-resultfirst1);
+	      if(result_exponent[9] == 1 || result_exponent == '0)
+		begin
+		   result_exponent = '0;
+		   result_mantisse = '0;
+		end
+	      else if(result_exponent[8:0] > 2**(Ne)-2)
+		begin
+		   result_exponent = '1;
+		   result_mantisse = '0;
+		end
+	   
+	      Aa.exponent = result_exponent;
+	   end
+	 /*
+         temp_mantisse = '0;
+         temp_mantisse[47:24]=result_mantisse;
+         result_mantisse = '0;
+	 	 
+         result_mantisse = temp_mantisse[(47-(24-resultfirst1))-:24];
+	 */
+	 //$display("result_mantisse = %b", result_mantisse);
+	 
+         
+         Aa.signe = result_signe;
+         Aa.mantisse = result_mantisse;
+	 //$display("Aa.sign = %b\nAa.mantisse = %b\nAa.exponent = %b\n",Aa.signe,Aa.mantisse,Aa.exponent);
+
+         return Aa;
+      end
+   endfunction // float_add_sub
 endpackage : float_pack
+   
    
