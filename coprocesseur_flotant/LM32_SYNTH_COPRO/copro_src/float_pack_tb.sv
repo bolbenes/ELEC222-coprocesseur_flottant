@@ -66,8 +66,8 @@ module float_pack_tb ;
 	else
 	  $display ("ERREUR resultat incorrect\n%d\n%d\n%d\n%d\n%f\n",A_mf,B_mf,result_mf,res_m,error);
 
-	A_mf = real2float(3.25);
-	B_mf = real2float(4);
+	A_mf = real2float(-1.117188e+00);
+	B_mf = real2float(1.128906e+00);
 	result_mf = float_add_sub(A_mf,B_mf,0);
 	res_m =real2float(float2real(A_mf)+float2real(B_mf));
 	error = float2real((res_m-result_mf)/(res_m+result_mf));

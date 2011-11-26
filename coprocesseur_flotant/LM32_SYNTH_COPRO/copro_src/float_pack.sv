@@ -117,19 +117,24 @@ package float_pack;
 	
    function float float_add(input float A, input float B);
       return float_add_sub(A,B,0);
-   endfunction
+   endfunction // float_add
+
+   function float float_sub(input A, input _B);
+      return float_add_sub(A,B,1);
+   endfunction // float_sub
+   
    
    function float float_add_sub(input float A, input float B, logic add_sub); // add: add_sub=0, sub: add_sub=1
-      logic [7:0] exp_difference;
-      logic [24:-2] shifted_mantisse;
-      logic [24:-2] temp1, temp2; // les mantisses qu'on additionne
-      logic [25:-2] result_mantisse_unnorm;
-      logic [23:0] mantisse_to_check;
+      logic [Ne-1:0] exp_difference;
+      logic [Nm+1:-2] shifted_mantisse;
+      logic [Nm+1:-2] temp1, temp2; // les mantisses qu'on additionne
+      logic [Nm+2:-2] result_mantisse_unnorm;
+      logic [Nm:0] mantisse_to_check;
       logic [4:0] result_first_one; 
       logic [47:-2] temp_shift;
       logic [47:0] temp_mantisse;
-      logic [9:0]  result_exponent;
-      logic [22:0] result_mantisse;
+      logic [Ne+1:0]  result_exponent;
+      logic [Nm-1:0] result_mantisse;
       logic 	   result_signe;
       float Aa,Bb;
       
@@ -160,12 +165,12 @@ package float_pack;
 	 if(exp_difference > Nm-1)
 	   return Aa;
          temp_shift = '0;
-         temp_shift[23] = 1;
-         temp_shift[22:0]= Bb.mantisse;
+         temp_shift[Nm] = 1;
+         temp_shift[Nm-1:0]= Bb.mantisse;
 
 	 //$display("\nexp_difference: %b",exp_difference);
 	 shifted_mantisse = '0;
-         shifted_mantisse[23:-2] = temp_shift[23+exp_difference-:26];
+         shifted_mantisse[Nm:-2] = temp_shift[Nm+exp_difference-:Nm+3];
 	 //$display("Aa.mantisse:\t\t\t %b",Aa.mantisse);
 	 //$display("shifted mantisse de Bb:\t %b",shifted_mantisse);
 	 temp1 = {2'b01, Aa.mantisse,2'b0};
@@ -208,26 +213,26 @@ package float_pack;
 	 //$display("result_mantisse_unnorm: \t%b",result_mantisse_unnorm);
 	 //$display("result_signe: %b",result_signe);
 	 
-    
-	 resultfirst1 = find_first_bit_one(result_mantisse_unnorm[25:2]);
+	 
+	 resultfirst1 = find_first_bit_one({20'b0,result_mantisse_unnorm[Nm+2:2]});
          //$display("first 1: %d",resultfirst1);
 
-	 if(resultfirst1 == 5'b0 && result_mantisse_unnorm[2:0] == 3'b0)
+	 if(resultfirst1 == 5'b0 && result_mantisse_unnorm[2] == 1'b0)
 	   begin
 	      result_mantisse = '0;
 	      Aa.exponent = '0;
 	   end
 	 else
 	   begin
-	      result_mantisse_unnorm = result_mantisse_unnorm << (25-resultfirst1-1);
-	      result_mantisse = result_mantisse_unnorm[25-:23];
-	      result_exponent = Aa.exponent - (21-resultfirst1);
-	      if(result_exponent[9] == 1 || result_exponent == '0)
+	      result_mantisse_unnorm = result_mantisse_unnorm << (Nm+2-resultfirst1-1);
+	      result_mantisse = result_mantisse_unnorm[Nm+2-:Nm];
+	      result_exponent = Aa.exponent - (Nm-2-resultfirst1);
+	      if(result_exponent[Ne+1] == 1 || result_exponent == '0)
 		begin
 		   result_exponent = '0;
 		   result_mantisse = '0;
 		end
-	      else if(result_exponent[8:0] > 2**(Ne)-2)
+	      else if(result_exponent[Ne:0] > 2**(Ne)-2)
 		begin
 		   result_exponent = '1;
 		   result_mantisse = '0;
@@ -239,7 +244,7 @@ package float_pack;
          temp_mantisse = '0;
          temp_mantisse[47:24]=result_mantisse;
          result_mantisse = '0;
-	 	 
+	  
          result_mantisse = temp_mantisse[(47-(24-resultfirst1))-:24];
 	 */
 	 //$display("result_mantisse = %b", result_mantisse);
