@@ -10,8 +10,8 @@ module float_pack_tb ;
    logic[23:0] mantisse_to_check;
    logic[4:0] result_first_one;
    int 	      i, found, position;
+
    
-   FIND_FIRST_BIT_ONE I_FFBO (.word(mantisse_to_check), .first_one(result_first_one));
    
    initial
      begin
@@ -66,8 +66,8 @@ module float_pack_tb ;
 	else
 	  $display ("ERREUR resultat incorrect\n%d\n%d\n%d\n%d\n%f\n",A_mf,B_mf,result_mf,res_m,error);
 
-	A_mf = real2float(-1.117188e+00);
-	B_mf = real2float(1.128906e+00);
+	A_mf = real2float(-4.553223e-02);
+	B_mf = real2float(6.400000e+01);
 	result_mf = float_add_sub(A_mf,B_mf,0);
 	res_m =real2float(float2real(A_mf)+float2real(B_mf));
 	error = float2real((res_m-result_mf)/(res_m+result_mf));

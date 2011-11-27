@@ -3,6 +3,9 @@ package float_pack;
    // utilisée par votre coprocesseur
    parameter Nm =`TB_MANT_SIZE;
    parameter Ne = `TB_EXP_SIZE;
+
+   logic display_debug_info = `DEBUG;
+   
    `include "../find_first_bit_one.sv"
    typedef struct packed 
 		  {
@@ -113,13 +116,13 @@ package float_pack;
    endfunction
    
    logic[23:0] findfirst1;
-   logic [4:0] resultfirst1;
+   logic signed [5:0] resultfirst1;
 	
    function float float_add(input float A, input float B);
       return float_add_sub(A,B,0);
    endfunction // float_add
 
-   function float float_sub(input A, input _B);
+   function float float_sub(input A, input B);
       return float_add_sub(A,B,1);
    endfunction // float_sub
    
@@ -159,23 +162,34 @@ package float_pack;
 	   return Aa;
 	 
 	 
-	 //$display("\nNouveau calcul\nAa.signe %b\nAa.mantisse %b\nAa.exponent %b\nBb.signe %b\nBb.mantisse %b\nBb.exponent %b",Aa.signe,Aa.mantisse,Aa.exponent,Bb.signe,Bb.mantisse,Bb.exponent);
-	 
+	 if(display_debug_info)
+	   $display("\nNouveau calcul\nAa.signe %b\nAa.mantisse %b\nAa.exponent %b\nBb.signe %b\nBb.mantisse %b\nBb.exponent %b",Aa.signe,Aa.mantisse,Aa.exponent,Bb.signe,Bb.mantisse,Bb.exponent);
+
 	 exp_difference = Aa.exponent-Bb.exponent;
-	 if(exp_difference > Nm-1)
+	 if(display_debug_info)
+	   $display("\nexp_difference: %b",exp_difference);
+
+	 if(exp_difference > Nm+2)
 	   return Aa;
          temp_shift = '0;
          temp_shift[Nm] = 1;
          temp_shift[Nm-1:0]= Bb.mantisse;
 
-	 //$display("\nexp_difference: %b",exp_difference);
 	 shifted_mantisse = '0;
          shifted_mantisse[Nm:-2] = temp_shift[Nm+exp_difference-:Nm+3];
-	 //$display("Aa.mantisse:\t\t\t %b",Aa.mantisse);
-	 //$display("shifted mantisse de Bb:\t %b",shifted_mantisse);
 	 temp1 = {2'b01, Aa.mantisse,2'b0};
-	 //$display("mantisse de Aa:\t\t %b\n",temp1);
 	 temp2 = shifted_mantisse;
+	 
+	 if(display_debug_info)
+	   begin
+	      $display("Aa.mantisse:\t\t\t %b",Aa.mantisse);
+	      $display("shifted mantisse de Bb:\t %b",shifted_mantisse);
+	      $display("mantisse de Aa:\t\t %b\n",temp1);
+	   end
+	 
+	 
+	 
+	 
 	 
 	 
 	 if(add_sub == 0) // add
@@ -210,50 +224,58 @@ package float_pack;
 		end	      
 	   end // else: !if(add_sub == 0)
 
-	 //$display("result_mantisse_unnorm: \t%b",result_mantisse_unnorm);
-	 //$display("result_signe: %b",result_signe);
-	 
-	 
 	 resultfirst1 = find_first_bit_one({20'b0,result_mantisse_unnorm[Nm+2:2]});
-         //$display("first 1: %d",resultfirst1);
 
-	 if(resultfirst1 == 5'b0 && result_mantisse_unnorm[2] == 1'b0)
+	 if(display_debug_info)
 	   begin
-	      result_mantisse = '0;
+	      $display("result_mantisse_unnorm: \t%b",result_mantisse_unnorm);
+	      $display("result_signe: %b",result_signe);
+              $display("first 1: %d",resultfirst1);
+	   end
+
+	 if(resultfirst1 == 6'b0 && result_mantisse_unnorm[2:0] == 3'b0)
+	   begin
+	      Aa.mantisse = '0;
 	      Aa.exponent = '0;
+	      Aa.signe = result_signe;
+	      return Aa;
 	   end
-	 else
+	 else if(result_mantisse_unnorm[2]==1);
+	 
+	 else if(resultfirst1 == 6'b0 && result_mantisse_unnorm[2:1] == 2'b01)
 	   begin
-	      result_mantisse_unnorm = result_mantisse_unnorm << (Nm+2-resultfirst1-1);
-	      result_mantisse = result_mantisse_unnorm[Nm+2-:Nm];
-	      result_exponent = Aa.exponent - (Nm-2-resultfirst1);
-	      if(result_exponent[Ne+1] == 1 || result_exponent == '0)
-		begin
-		   result_exponent = '0;
-		   result_mantisse = '0;
-		end
-	      else if(result_exponent[Ne:0] > 2**(Ne)-2)
-		begin
-		   result_exponent = '1;
-		   result_mantisse = '0;
-		end
-	   
-	      Aa.exponent = result_exponent;
+	      resultfirst1=-1;
 	   end
-	 /*
-         temp_mantisse = '0;
-         temp_mantisse[47:24]=result_mantisse;
-         result_mantisse = '0;
-	  
-         result_mantisse = temp_mantisse[(47-(24-resultfirst1))-:24];
-	 */
-	 //$display("result_mantisse = %b", result_mantisse);
+	 else if(resultfirst1 == 6'b0 && result_mantisse_unnorm[0]==1)
+	   begin
+	      resultfirst1=-2;
+	   end
+	 result_mantisse_unnorm = result_mantisse_unnorm << (Nm+2-resultfirst1-1);
+	 result_mantisse = result_mantisse_unnorm[Nm+2-:Nm];
+	 result_exponent = Aa.exponent - (Nm-2-resultfirst1);
+	 if(result_exponent[Ne+1] == 1 || result_exponent == '0)
+	   begin
+	      result_exponent = '0;
+	      result_mantisse = '0;
+	   end
+	 else if(result_exponent[Ne:0] > 2**(Ne)-2)
+	   begin
+	      result_exponent = '1;
+	      result_mantisse = '0;
+	   end
+	 
+	 Aa.exponent = result_exponent;
+	 
 	 
          
          Aa.signe = result_signe;
          Aa.mantisse = result_mantisse;
-	 //$display("Aa.sign = %b\nAa.mantisse = %b\nAa.exponent = %b\n",Aa.signe,Aa.mantisse,Aa.exponent);
 
+	 if(display_debug_info)
+	   begin
+	      $display("result_mantisse = %b", result_mantisse);
+	      $display("Aa.sign = %b\nAa.mantisse = %b\nAa.exponent = %b\n",Aa.signe,Aa.mantisse,Aa.exponent);
+	   end
          return Aa;
       end
    endfunction // float_add_sub
