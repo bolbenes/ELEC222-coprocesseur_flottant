@@ -105,33 +105,49 @@
 # 2720
 # 0.007812
 # 
-# A: 1.031250e+00
+# A: 2.555000e+02
 # 
 # Nouveau calcul
-# Aa.signe 0
-# Aa.mantisse 00001000
-# Aa.exponent 0111
-# Bb.signe 1
-# Bb.mantisse 00100001
-# Bb.exponent 0010
+# Aa.signe 1
+# Aa.mantisse 11111111
+# Aa.exponent 1110
+# Bb.signe 0
+# Bb.mantisse 11111111
+# Bb.exponent 1110
 # 
-# exp_difference: 0101
-# Aa.mantisse:			 00001000
-# shifted mantisse de Bb:	 000000100100
-# mantisse de Aa:		 010000100000
+# exp_difference: 0000
+# Aa.mantisse:			 11111111
+# shifted mantisse de Bb:	 011111111100
+# mantisse de Aa:		 011111111100
 # 
-# result_mantisse_unnorm: 	0001111111100
-# result_signe: 0
-# first 1:   5
-# result_mantisse = 11111110
-# Aa.sign = 0
-# Aa.mantisse = 11111110
-# Aa.exponent = 0110
+# result_mantisse_unnorm: 	0000000000000
+# result_signe: 1
+# first 1:   0
+# OK resultat correct
+# A:		 0111011111111
+# B:		 1111011111111
+# A+B:		 1000000000000
+# A+B correct: 	 0000000000000
+#  Error: 0.007843
+# 
+# A: -1.995000e+02
+# 
+# Nouveau calcul
+# A.signe 1
+# A.mantisse 10001111
+# A.exponent 1110
+# B.signe 0
+# B.mantisse 11100111
+# B.exponent 0010
+# 
+# A.mantisse:	110001111
+# B.mantisse:	111100111
+# temp_exponent:	010011
 # 
 # OK resultat correct
-# A:		 0011100001000
-# B:		 1001000100001
-# A+B:		 0011011111110
-# A+B correct: 	 0011011111101
-#  Error: 0.007874
+# A:		 1111010001111
+# B:		 0001011100111
+# A+B:		 1111011111111
+# A/B correct: 	 1111011111111
+#  Error: 0.007812
 # 

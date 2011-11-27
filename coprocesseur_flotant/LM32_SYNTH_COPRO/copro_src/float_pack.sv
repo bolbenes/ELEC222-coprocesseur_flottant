@@ -4,7 +4,8 @@ package float_pack;
    parameter Ne = `TB_EXP_SIZE;
 
    // display_debug_info = 1 -> The whole run is commented by calls of $display
-   logic display_debug_info = 0;
+   logic display_debug_info = `DEBUG;
+   
    
    `include "../find_first_bit_one.sv"
    
@@ -291,6 +292,79 @@ package float_pack;
          return Aa;
       end
    endfunction // float_add_sub
+
+   function float float_div(input float A, input float B);
+      float result;
+      logic signed [Ne+1:0] temp_exponent;
+      logic [Nm-1:-Nm-1]    temp_mantisse;
+      
+      
+      begin
+	 // determination de signe
+	 result.signe=A.signe^B.signe;
+	 if(display_debug_info)
+	   $display("\nNouveau calcul\nA.signe %b\nA.mantisse %b\nA.exponent %b\nB.signe %b\nB.mantisse %b\nB.exponent %b\n",A.signe,A.mantisse,A.exponent,B.signe,B.mantisse,B.exponent);
+
+	 // 0 / B
+	 if ({A.exponent,A.mantisse} == '0)
+	   begin
+              result.mantisse ='0;
+              result.exponent ='0;
+	      result.signe = 0;
+	      return result;
+ 	   end
+	 //division par zero
+	 if (B.mantisse == 0 && B.exponent ==0)
+	   begin
+	      result.signe = 0;
+	      result.mantisse ='0;
+              result.exponent ='1;
+	      return result;
+	   end
+	 
+	 // calcul de l'exposant
+	 temp_exponent = A.exponent - B.exponent + (2**(Ne-1)-1);
+	 if(display_debug_info)
+	   begin
+	      $display("A.mantisse:\t%b\nB.mantisse:\t%b",{1'b1,A.mantisse},{1'b1,B.mantisse});
+	      $display("temp_exponent:\t%b\n", temp_exponent);
+	   end
+	 // saturation
+	 if(temp_exponent > 2**Ne-2)
+	   begin
+	      result.mantisse = '1;
+	      result.exponent = 2**Ne-2;
+	      return result;
+	   end
+
+	 // underflow (-> 0)
+	 if(temp_exponent[Ne+1] == 1)
+	   begin
+	      result.mantisse = '0;
+	      result.exponent = '0;
+	      return result;
+	   end
+	 
+	 // calcul de la mantisse
+	 temp_mantisse = {1'b1,A.mantisse,{Nm+1{1'b0}}} / {1'b1,B.mantisse};
+	  if(display_debug_info)
+	    begin
+	       $display("temp_mantisse: %b",temp_mantisse);
+	    end
+	 if(temp_mantisse[0] == 1)
+	   begin
+	      result.mantisse = temp_mantisse[-1:-Nm];
+	      result.exponent = temp_exponent;
+	      return result;
+	   end
+	 result.mantisse = temp_mantisse[-1:-Nm-1];
+	 result.exponent = temp_exponent - 1;
+	 
+	 
+	 return result;
+      end
+   endfunction // float_div
+   
 endpackage : float_pack
    
    

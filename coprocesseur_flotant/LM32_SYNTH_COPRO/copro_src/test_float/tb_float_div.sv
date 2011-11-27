@@ -92,8 +92,8 @@ $fdisplay(of,"===Test Division===");
 		begin
 		  max_sat_case++ ;
 		  if ((rC != max_neg_val)&& (C != neg_inf_val)) max_sat_err++ ;
-		  //$fdisplay(of,"Dépassement maximal negatif mal traité") ; 
-		  //$fdisplay(of,"%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
+		  $fdisplay(of,"Dépassement maximal negatif mal traité") ; 
+		  $fdisplay(of,"%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
 		end
 		else
 		if (((rD > 0) && (rD <  min_pos_val)) || ((rD < 0) && (rD > min_neg_val)))
