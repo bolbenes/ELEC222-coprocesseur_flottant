@@ -3,10 +3,6 @@ package float_pack;
    parameter Nm =`TB_MANT_SIZE;
    parameter Ne = `TB_EXP_SIZE;
 
-   // display_debug_info = 1 -> The whole run is commented by calls of $display
-   logic display_debug_info = `DEBUG;
-   
-   
    `include "../find_first_bit_one.sv"
    
    typedef struct packed 
@@ -117,9 +113,7 @@ package float_pack;
       end
    endfunction
    
-   logic[23:0] findfirst1;
-   logic signed [5:0] resultfirst1;
-	
+  	
    function float float_add(input float A, input float B);
       return float_add_sub(A,B,0);
    endfunction // float_add
@@ -135,15 +129,34 @@ package float_pack;
       logic [Nm+1:-2] temp1, temp2; // les mantisses qu'on additionne
       logic [Nm+2:-2] result_mantisse_unnorm;
       logic [Nm:0] mantisse_to_check;
-      logic [4:0] result_first_one; 
+      logic [5:0]  resultfirst1;
       logic [48:-2] temp_shift;
       logic [48:0] temp_mantisse;
       logic [Ne+1:0]  result_exponent;
       logic [Nm-1:0] result_mantisse;
       logic 	   result_signe;
-      float Aa,Bb;
+      float Aa,Bb;     
+      // display_debug_info = 1 -> The whole run is commented by calls of $display
+      logic 	   display_debug_info;
+      logic 	   subtrahend;
+
+      exp_difference = '0;
+      shifted_mantisse = '0;
+      temp1 = '0;
+      temp2 = '0;
+      result_mantisse_unnorm = '0;
+      mantisse_to_check = '0;
+      resultfirst1 = '0;
+      temp_shift = '0;
+      temp_mantisse ='0;
+      result_exponent = '0;
+      result_mantisse = '0;
+      result_signe = 0;
+      Aa = '0;
+      Bb = '0;
       
-      logic 	   subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
+      display_debug_info = 0;
+      subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
       begin
 	 if({A.exponent,A.mantisse} <= {B.exponent,B.mantisse})
 	   begin
@@ -297,7 +310,14 @@ package float_pack;
       float result;
       logic signed [Ne+1:0] temp_exponent;
       logic [Nm-1:-Nm-1]    temp_mantisse;
+      // display_debug_info = 1 -> The whole run is commented by calls of $display
+      logic 		    display_debug_info;
+
+      result = '0;
+      temp_exponent = '0;
+      temp_mantisse = '0;
       
+      display_debug_info = 0;
       
       begin
 	 // determination de signe
