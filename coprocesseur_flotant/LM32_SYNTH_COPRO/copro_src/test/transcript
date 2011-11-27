@@ -1,4 +1,5 @@
 # vsim -c float_pack_tb 
+# ** Warning: (vsim-56) Problem with optimized design dependency file "/cal/nfs3/promo13/schock/copro/ELEC222-coprocesseur_flottant/coprocesseur_flotant/LM32_SYNTH_COPRO/copro_src/test/work/@_opt1/_deps" - file is inconsistent with version property.
 # ** Note: (vsim-3813) Design is being optimized due to module recompilation...
 # //  ModelSim SE-64 10.0d Oct 30 2011 Linux 2.6.32-5-amd64
 # //
@@ -12,7 +13,6 @@
 # Loading sv_std.std
 # Loading work.float_pack(fast)
 # Loading work.float_pack_tb(fast)
-# Loading work.FIND_FIRST_BIT_ONE(fast)
 #  
 # OK resultat correct
 # 3839
@@ -105,32 +105,33 @@
 # 2720
 # 0.007812
 # 
+# A: 1.031250e+00
 # 
 # Nouveau calcul
 # Aa.signe 0
-# Aa.mantisse 00100000
+# Aa.mantisse 00001000
 # Aa.exponent 0111
 # Bb.signe 1
-# Bb.mantisse 00011110
-# Bb.exponent 0111
+# Bb.mantisse 00100001
+# Bb.exponent 0010
 # 
-# exp_difference: 0000
-# Aa.mantisse:			 00100000
-# shifted mantisse de Bb:	 010001111000
-# mantisse de Aa:		 010010000000
+# exp_difference: 0101
+# Aa.mantisse:			 00001000
+# shifted mantisse de Bb:	 000000100100
+# mantisse de Aa:		 010000100000
 # 
-# result_mantisse_unnorm: 	0000000001000
+# result_mantisse_unnorm: 	0001111111100
 # result_signe: 0
-# first 1:  0
-# result_mantisse = 00000000
+# first 1:   5
+# result_mantisse = 11111110
 # Aa.sign = 0
-# Aa.mantisse = 00000000
-# Aa.exponent = 0000
+# Aa.mantisse = 11111110
+# Aa.exponent = 0110
 # 
 # OK resultat correct
-# A:		 1011100011110
-# B:		 0011100100000
-# A+B:		 0000000000000
-# A+B correct: 	 0000000000000
-#  Error: 0.000000
+# A:		 0011100001000
+# B:		 1001000100001
+# A+B:		 0011011111110
+# A+B correct: 	 0011011111101
+#  Error: 0.007874
 # 

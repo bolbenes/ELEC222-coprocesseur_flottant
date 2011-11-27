@@ -123,6 +123,9 @@ $fdisplay(of,"===Test addition===");
 		begin
 		   exp_out_err++ ;
 		   $display("Exp erreur!");
+		   $display("A: %e\nB: %e\n",rA,rB);
+		   $display("A: %b\nB: %b\n",A,B);
+		   $display("Res du CP:\nsign = %b\nmantisse = %b\nexponent = %b\n",C.`SIGN,C.`MANT,C.`EXP);
 		   $display("Correct:\nsign = %b\nmantisse = %b\nexponent = %b\n",D.`SIGN,D.`MANT,D.`EXP);
 		end 
 		else // Le cas normal : calcul de l'erreur max et de l'erreur moyenne

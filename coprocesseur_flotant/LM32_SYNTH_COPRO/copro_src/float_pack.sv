@@ -1,12 +1,13 @@
-package float_pack; 
-// Ajouter ici les définition des fonctions
-   // utilisée par votre coprocesseur
+package float_pack;
+   
    parameter Nm =`TB_MANT_SIZE;
    parameter Ne = `TB_EXP_SIZE;
 
-   logic display_debug_info = `DEBUG;
+   // display_debug_info = 1 -> The whole run is commented by calls of $display
+   logic display_debug_info = 0;
    
    `include "../find_first_bit_one.sv"
+   
    typedef struct packed 
 		  {
 		     logic signe;
@@ -134,8 +135,8 @@ package float_pack;
       logic [Nm+2:-2] result_mantisse_unnorm;
       logic [Nm:0] mantisse_to_check;
       logic [4:0] result_first_one; 
-      logic [47:-2] temp_shift;
-      logic [47:0] temp_mantisse;
+      logic [48:-2] temp_shift;
+      logic [48:0] temp_mantisse;
       logic [Ne+1:0]  result_exponent;
       logic [Nm-1:0] result_mantisse;
       logic 	   result_signe;
@@ -143,14 +144,11 @@ package float_pack;
       
       logic 	   subtrahend = 0; // 0 signifie, que B est le subtrahend, 1 signifie que A est le subtrahend
       begin
-	 //$display("A.sign = %b\nA.mantisse = %b\nA.exponent = %b\n",A.signe,A.mantisse,A.exponent);
-	 //$display("B.sign = %b\nB.mantisse = %b\nB.exponent = %b\n",B.signe,B.mantisse,B.exponent);
-	 
 	 if({A.exponent,A.mantisse} <= {B.exponent,B.mantisse})
 	   begin
 	      Aa = B;
 	      Bb = A;
-	   subtrahend = 1;
+	      subtrahend = 1; // -> si ca serait une soustraction, on voudrait calculer Bb-Aa
 	   end
 	 else
 	   begin
@@ -158,6 +156,8 @@ package float_pack;
 	      Bb = B;
 	   end // else: !if(A.exponent <= B.exponent)
 
+
+	 // Aa + 0 = Aa ...
 	 if({Bb.mantisse,Bb.exponent} == '0)
 	   return Aa;
 	 
@@ -165,12 +165,23 @@ package float_pack;
 	 if(display_debug_info)
 	   $display("\nNouveau calcul\nAa.signe %b\nAa.mantisse %b\nAa.exponent %b\nBb.signe %b\nBb.mantisse %b\nBb.exponent %b",Aa.signe,Aa.mantisse,Aa.exponent,Bb.signe,Bb.mantisse,Bb.exponent);
 
+	 
 	 exp_difference = Aa.exponent-Bb.exponent;
+	 
 	 if(display_debug_info)
 	   $display("\nexp_difference: %b",exp_difference);
 
+	 // le nombre Bb est trop petit pour influencer le résultat
 	 if(exp_difference > Nm+2)
-	   return Aa;
+	   begin
+	      if(Aa.signe==0 && Bb.signe == 1 && Aa.mantisse == '0)
+		begin
+		   Aa.mantisse = '1;
+		   Aa.exponent = Aa.exponent - 1;
+		end
+	      return Aa;
+	   end
+	 
          temp_shift = '0;
          temp_shift[Nm] = 1;
          temp_shift[Nm-1:0]= Bb.mantisse;
@@ -179,6 +190,8 @@ package float_pack;
          shifted_mantisse[Nm:-2] = temp_shift[Nm+exp_difference-:Nm+3];
 	 temp1 = {2'b01, Aa.mantisse,2'b0};
 	 temp2 = shifted_mantisse;
+
+	 // temp1 et temp2 sont maintenant les mantisses (Bb décalé) avec plus de bits de précision
 	 
 	 if(display_debug_info)
 	   begin
@@ -186,12 +199,8 @@ package float_pack;
 	      $display("shifted mantisse de Bb:\t %b",shifted_mantisse);
 	      $display("mantisse de Aa:\t\t %b\n",temp1);
 	   end
-	 
-	 
-	 
-	 
-	 
-	 
+
+	 // Traitemant de signe et de l'addition / de la soustraction de la mantisse
 	 if(add_sub == 0) // add
 	   begin
 	      result_signe = Aa.signe;
@@ -224,6 +233,7 @@ package float_pack;
 		end	      
 	   end // else: !if(add_sub == 0)
 
+	 // trouver le premier un pour normaliser la mantisse du résultat
 	 resultfirst1 = find_first_bit_one({20'b0,result_mantisse_unnorm[Nm+2:2]});
 
 	 if(display_debug_info)
@@ -233,6 +243,7 @@ package float_pack;
               $display("first 1: %d",resultfirst1);
 	   end
 
+	 // Traitement des cas spéciaux avec des 1 dèrriere la précision de Nm bits
 	 if(resultfirst1 == 6'b0 && result_mantisse_unnorm[2:0] == 3'b0)
 	   begin
 	      Aa.mantisse = '0;
@@ -250,9 +261,12 @@ package float_pack;
 	   begin
 	      resultfirst1=-2;
 	   end
+
+	 // normalisation
 	 result_mantisse_unnorm = result_mantisse_unnorm << (Nm+2-resultfirst1-1);
 	 result_mantisse = result_mantisse_unnorm[Nm+2-:Nm];
 	 result_exponent = Aa.exponent - (Nm-2-resultfirst1);
+	 // traitement des cas de saturation
 	 if(result_exponent[Ne+1] == 1 || result_exponent == '0)
 	   begin
 	      result_exponent = '0;
@@ -263,11 +277,9 @@ package float_pack;
 	      result_exponent = '1;
 	      result_mantisse = '0;
 	   end
-	 
+
+	 // construction du résultat et return
 	 Aa.exponent = result_exponent;
-	 
-	 
-         
          Aa.signe = result_signe;
          Aa.mantisse = result_mantisse;
 
