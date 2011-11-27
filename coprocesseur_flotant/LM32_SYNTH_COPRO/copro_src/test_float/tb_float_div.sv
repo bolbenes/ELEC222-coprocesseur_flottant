@@ -67,7 +67,7 @@ $fdisplay(of,"===Test Division===");
 		B.`SIGN=$random() ;
 		B.`EXP=$random()  ;
 		B.`MANT=$random() ;
-		if(B.`EXP == 0) A.`MANT = 0 ;
+		if(B.`EXP == 0) B.`MANT = 0 ;
 		if(B.`EXP == ((2**`TB_EXP_SIZE)-1)) B.`EXP = (2**`TB_EXP_SIZE)-2 ;
 		if(B == pos_zero_val) B=min_pos_val ;
 		if(B == neg_zero_val) B=min_neg_val ;
@@ -91,17 +91,22 @@ $fdisplay(of,"===Test Division===");
 		if (rD < max_neg_val)
 		begin
 		  max_sat_case++ ;
-		  if ((rC != max_neg_val)&& (C != neg_inf_val)) max_sat_err++ ;
-		  $fdisplay(of,"Dépassement maximal negatif mal traité") ; 
-		  $fdisplay(of,"%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
+		  if ((rC != max_neg_val)&& (C != neg_inf_val))
+		    begin
+		       max_sat_err++ ;
+		       $display("Dépassement maximal negatif mal traité") ; 
+		       $display("%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
+		    end
 		end
 		else
 		if (((rD > 0) && (rD <  min_pos_val)) || ((rD < 0) && (rD > min_neg_val)))
 		begin
 		  zero_sat_case++ ;
-		  if (C != pos_zero_val && C!=neg_zero_val) zero_sat_err ++ ;
-		  //$fdisplay(of,"Troncature à zero  positif mal traité") ; 
-		  //$fdisplay(of,"%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
+		  if (C != pos_zero_val && C!=neg_zero_val) begin
+		     zero_sat_err ++ ;
+		     $display("Troncature à zero  positif mal traité") ; 
+		     $display("%e %e %e %e s:%x m:%x e:%x",rA,rB,rC,rD,C.`SIGN,C.`MANT,C.`EXP) ;
+		  end
 		end
 		else  // Le resultat nul
 		if ((A == pos_zero_val) || (A == neg_zero_val))

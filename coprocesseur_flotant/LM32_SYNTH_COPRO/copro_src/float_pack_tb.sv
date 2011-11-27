@@ -79,8 +79,8 @@ module float_pack_tb ;
 	else
 	  $display ("ERREUR resultat incorrect\n%d\n%d\n%d\n%d\n%f\n",A_mf,B_mf,result_mf,res_m,error);
 
-	A_mf = real2float(-1.995000e+02);
-	B_mf = real2float(5.957031e-02);
+	A_mf = real2float(-1.000000e+00);
+	B_mf = real2float(4.171315e-40);
 	$display("A: %e",float2real(A_mf));
 	
 	result_mf = float_div(A_mf,B_mf);

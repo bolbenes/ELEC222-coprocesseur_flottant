@@ -316,7 +316,7 @@ package float_pack;
 	 //division par zero
 	 if (B.mantisse == 0 && B.exponent ==0)
 	   begin
-	      result.signe = 0;
+	      result.signe = A.signe;
 	      result.mantisse ='0;
               result.exponent ='1;
 	      return result;
@@ -338,7 +338,7 @@ package float_pack;
 	   end
 
 	 // underflow (-> 0)
-	 if(temp_exponent[Ne+1] == 1)
+	 if(temp_exponent[Ne+1] == 1 || temp_exponent == '0)
 	   begin
 	      result.mantisse = '0;
 	      result.exponent = '0;
@@ -359,7 +359,12 @@ package float_pack;
 	   end
 	 result.mantisse = temp_mantisse[-1:-Nm-1];
 	 result.exponent = temp_exponent - 1;
-	 
+	 if(result.exponent == '0)
+	   begin
+	      result.mantisse = '0;
+	      result.exponent = '0;
+	      return result;
+	   end
 	 
 	 return result;
       end
